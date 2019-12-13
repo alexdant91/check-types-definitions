@@ -8,7 +8,7 @@ class Types {
     }
 
     clearConfig = () => {
-        this.value = value;
+        this.value = undefined;
         this.types = [];
         this.required = false;
         return this;

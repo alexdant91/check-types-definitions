@@ -1,11 +1,15 @@
 {
-  "name": "check-types",
-  "version": "0.5.1",
+  "name": "check-types-definitions",
+  "version": "0.5.2",
   "description": "JS Library to manage types and validations",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexdant91/check-types-definitions.git"
+  },
+  "author": "Alessandro D'Antoni",
   "license": "ISC"
 }
