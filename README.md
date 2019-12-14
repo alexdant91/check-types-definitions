@@ -106,7 +106,7 @@ const isValid = CheckTypes.set("123").Required().String().Number().check(); // R
 ```
 
 
-# How to use Interface
+## How to use Interface
 
 You can compare data type to a specific class for validation purpose:
 
