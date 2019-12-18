@@ -1,19 +1,19 @@
-// Require `Types` class
-const { Types } = require('../index');
+// Require classes
+const { Types, DefineTypes, Schema } = require('../index');
 // Declare `Types`
-const CheckTypes = new Types().options({ return_boolean: false });
+const CheckTypes = new Types().options({ return_boolean: true });
 // Declare a new Schema
-const schema = {
+const schema = new Schema({
     first_name: {
-        type: "string",
+        type: DefineTypes.String,
         default: "John"
     },
     last_name: {
-        type: "string",
+        type: DefineTypes.String,
         required: true,
         default: null
     }
-}
+});
 // My dummy data source
 const data = {
     first_name: "John",

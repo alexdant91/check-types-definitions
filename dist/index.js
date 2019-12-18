@@ -26,7 +26,36 @@
  * -------------------------------------------------------------------------------------------------------
  */
 
-// TODO: Separate Schema declaration in a new class
+// ?NEW FEATURE
+class DefineTypes {
+    static Any = "any";
+    static Null = null;
+    static String = "string";
+    static Number = "number";
+    static BigInt = "bigint";
+    static Function = "function";
+    static Symbol = "symbol";
+    static Object = "object";
+    static Array = "array";
+    static Boolean = "boolean";
+}
+
+// ?NEW FEATURE
+class Schema {
+    constructor(schema) {
+        if (typeof schema === "object" && !Array.isArray(schema)) {
+            Object.keys(schema).map(key => {
+                if (schema[key].type) {
+                    this[key] = schema[key];
+                } else {
+                    throw new Error("Schema type property accept only `DefineTypes` data type.");
+                }
+            });
+        } else {
+            throw new Error("Schema constructor accept only object data type.");
+        }
+    }
+}
 
 class Types {
     constructor(value, Interface = false) {
@@ -50,13 +79,13 @@ class Types {
         return this;
     }
 
-    checkType = (value, types = null) => {
+    checkType = (value, types = null, bool = true) => {
         const typeError = Array.isArray(value) ? "array" : typeof value;
         const typeCheckError = types == null ? this.types.join('" or "') : types.join('" or "');
         const typesArray = types == null ? this.types : types;
         if (typesArray.indexOf(typeError) !== -1 || this.types.indexOf("any") !== -1) return true;
         // Value not corrisponding to types
-        if (!this.rb) throw new Error(`Value is marked as type "${typeCheckError}" but you get type "${typeError}"`);
+        if (!this.rb || !bool) throw new Error(`Value is marked as type "${typeCheckError}" but you get type "${typeError}"`);
         return false;
     }
 
@@ -74,7 +103,7 @@ class Types {
     }
 
     validateDataSchema = (data, schema, cb = (err = { field: null, message: null }, isValid = false, data = null) => { }, options = { strict: true }) => {
-        if (typeof schema === "object" && !Array.isArray(schema)) {
+        if (schema instanceof Schema) {
 
             const keys = Object.keys(schema);
 
@@ -92,7 +121,7 @@ class Types {
             }
 
             // Array to store all errors
-            let comb = [], errors = [];
+            let errors = [];
 
             for (let i = 0;i < keys.length;i++) {
                 const key = keys[i];
@@ -102,9 +131,9 @@ class Types {
                 // Validate required if defined
                 if (validation.required) {
                     if (validation.default === undefined) {
-                        if (typeof data[key] !== "boolean" && (data[key] == undefined || data[key] == '')) return cb({ field: `${key}`, message: `'${key}' is required.` }, false, null);
+                        if (!this.checkType(data[key], ["boolean"], true) && (data[key] == undefined || data[key] == '')) return cb({ field: `${key}`, message: `'${key}' is required.` }, false, null);
                     } else {
-                        if (typeof data[key] !== "boolean" && (data[key] == undefined || data[key] == '')) {
+                        if (!this.checkType(data[key], ["boolean"], true) && (data[key] == undefined || data[key] == '')) {
                             dataValidated = { ...dataValidated, [key]: typeof validation.default === "function" ? validation.default() : validation.default }
                             isDefault = true;
                         }
@@ -112,23 +141,7 @@ class Types {
                 }
                 // Validate type, skip if is default true or if required is undefined
                 if (!isDefault || validation.required === undefined) {
-                    if (!Array.isArray(validation.type)) {
-                        if (validation.type != "array") {
-                            if (typeof data[key] !== validation.type) return cb(`'${key}' need to be typeof ${validation.type}.`, false, null);
-                        } else {
-                            if (!Array.isArray(data[key])) return cb({ field: `${key}`, message: `'${key}' need to be typeof array.` }, false, null);
-                        }
-                    } else {
-                        let combs = [];
-                        for (let a = 0;a < validation.type.length;a++) {
-                            if (validation.type[a] != "array") {
-                                if (typeof data[key] !== validation.type[a]) combs.push('error');
-                            } else {
-                                if (!Array.isArray(data[key])) combs.push('error');
-                            }
-                        }
-                        if (combs.length == validation.type.length) return cb({ field: `${key}`, message: `'${key}' need to be typeof ${validation.type.join(' or ')}.` }, false, null);
-                    }
+                    if (!this.checkType(data[key], [validation.type], true)) return cb(`'${key}' need to be typeof ${validation.type}.`, false, null);
                 }
             }
             // Check if theres errors to return else return isValid true
@@ -136,7 +149,7 @@ class Types {
             if (errors.length == 1) return cb({ field: `${errors[0].error.field}`, message: errors[0].error.message }, false, null);
             return cb(errors, false, null);
         } else {
-            return cb(`'${schema}' need to be an object.`, false, null);
+            return cb(`'${schema}' need to be a <Schema> object type.`, false, null);
         }
     }
 
@@ -160,10 +173,14 @@ class Types {
     }
 
     setSchema = (schema = {}, options = { strict: true, extended: true }) => {
-        this.Schema = schema;
-        this.SchemaStrictMode = options.strict != undefined ? options.strict : true;
-        this.SchemaExtendedMode = options.extended != undefined ? options.extended : true;
-        return this;
+        if (schema instanceof Schema) {
+            this.Schema = schema;
+            this.SchemaStrictMode = options.strict != undefined ? options.strict : true;
+            this.SchemaExtendedMode = options.extended != undefined ? options.extended : true;
+            return this;
+        } else {
+            throw new Error("Schema type object required. Use the `Schema` class provided.");
+        }
     }
 
     check = () => {
@@ -209,53 +226,53 @@ class Types {
 
     // Specials
     Any = () => {
-        this.types.push("any");
+        this.types.push(DefineTypes.Any);
         return this;
     }
 
     Null = () => {
-        this.types.push(null);
+        this.types.push(DefineTypes.Null);
         return this;
     }
 
     // Normal
     String = () => {
-        this.types.push("string");
+        this.types.push(DefineTypes.String);
         return this;
     }
 
     Number = () => {
-        this.types.push("number");
+        this.types.push(DefineTypes.Number);
         return this;
     }
 
     BigInt = () => {
-        this.types.push("bigint");
+        this.types.push(DefineTypes.BigInt);
         return this;
     }
 
     Function = () => {
-        this.types.push("function");
+        this.types.push(DefineTypes.Function);
         return this;
     }
 
     Symbol = () => {
-        this.types.push("symbol");
+        this.types.push(DefineTypes.Symbol);
         return this;
     }
 
     Object = () => {
-        this.types.push("object");
+        this.types.push(DefineTypes.Object);
         return this;
     }
 
     Array = () => {
-        this.types.push("array");
+        this.types.push(DefineTypes.Array);
         return this;
     }
 
     Boolean = () => {
-        this.types.push("boolean");
+        this.types.push(DefineTypes.Boolean);
         return this;
     }
 
@@ -275,6 +292,13 @@ class Validate extends Types {
     static US_PHONE_NUMBER = new RegExp(/^\(?[\d]{3}\)?[\s-]?[\d]{3}[\s-]?[\d]{4}$/, "ig");
     static FRANCE_PHONE_NUMBER = new RegExp(/^0[1-6]{1}(([0-9]{2}){4})|((\s[0-9]{2}){4})|((-[0-9]{2}){4})$/, "ig");
     static GERMAN_PHONE_NUMBER = new RegExp(/^\(\d{1,2}(\s\d{1,2}){1,2}\)\s(\d{1,2}(\s\d{1,2}){1,2})((-(\d{1,4})){0,1})$/, "ig");
+
+    // ?NEW FEATURE
+    isNotNull = () => {
+        if (typeof this.value !== 'null') return true;
+        if (!this.rb) throw new Error("Value must be not null");
+        return false;
+    }
 
     isEmail = () => {
         const regExp = this.STANDARD_EMAIL;
@@ -298,4 +322,4 @@ class Validate extends Types {
 
 }
 
-module.exports = { Types, Validate };
+module.exports = { DefineTypes, Types, Validate, Schema };

@@ -2,22 +2,24 @@
 
 Simple javascript library that give the ability to manage data types and Validate without `typescript`.
 
-1. [Install](#how-to-install)
-2. [How it works?](#how-it-works)
-3. [Types](#types)
-4. [Types Parameters](#types-parameters)
-5. [Types Methods](#types-methods)
-6. [How to check data value?](#how-to-check-data-value)
-7. [How to use interface?](#how-to-use-interface)
-8. [How to use Schema?](#how-to-use-schema)
-9. [Define a Schema](#define-a-schema)
-10. [Schema types Allowed](#schema-types-allowed)
-11. [Valid Schema options](#valid-schema-options)
-12. [Validate](#types)
-13. [Validate Parameters](#Validate-parameters)
-14. [Validate Methods](#Validate-methods)
-15. [Validate Phone Format](#Validate-phone-format)
-16. [Use data Validate](#use-data-Validate)
+- [Install](#how-to-install)
+- [How it works?](#how-it-works)
+- [Types](#types)
+- [Types Parameters](#types-parameters)
+- [Types Methods](#types-methods)
+- [How to check data value?](#how-to-check-data-value)
+- [How to use interface?](#how-to-use-interface)
+- [Define data types](#define-data-types)
+- [Define data types list](#define-data-types-list)
+- [How to use Schema?](#how-to-use-schema)
+- [Define a Schema](#define-a-schema)
+- [Schema types Allowed](#schema-types-allowed)
+- [Valid Schema options](#valid-schema-options)
+- [Validate](#types)
+- [Validate Parameters](#Validate-parameters)
+- [Validate Methods](#Validate-methods)
+- [Validate Phone Format](#Validate-phone-format)
+- [Use data Validate](#use-data-Validate)
 
 
 ## How to Install?
@@ -133,27 +135,52 @@ const isValid = CheckTypes.set(user, UserData).check(); // Return true
 That example give you the ability to check if `user` is a valid `UserData` instance.
 
 
+## Define data types
+
+To define data types you need to use the `DefineTypes` class:
+
+```javascript
+const { DefineTypes } = require('check-types-definitions');
+// Example: define a string data type
+const stringType = DefineTypes.String;
+```
+
+
+## Define data types list
+
+1. `DefineTypes.Any` any types accepted.
+2. `DefineTypes.Null` only null type accepted.
+3. `DefineTypes.String` only string type accepted.
+4. `DefineTypes.Number` only number type accepted.
+5. `DefineTypes.BigInt` only bigint type accepted.
+6. `DefineTypes.Function` only function type accepted.
+7. `DefineTypes.Symbol` only symbol instance accepted.
+8. `DefineTypes.Object` only object type accepted.
+9. `DefineTypes.Array` only array type accepted.
+10. `DefineTypes.Boolean` sonly boolean type accepted.
+
+
 ## How to use Schema?
 
 Define a `Schema` allow you to check data using strong validation definitions declared in it:
 
 ```javascript
-// Require `Types` class
-const { Types } = require('../index');
+// Require classes
+const { Types, DefineTypes, Schema } = require('check-types-definitions');
 // Declare `Types`
-const CheckTypes = new Types().options({ return_boolean: false });
+const CheckTypes = new Types().options({ return_boolean: true });
 // Declare a new Schema
-const schema = {
+const schema = new Schema({
     first_name: {
-        type: "string",
+        type: DefineTypes.String,
         default: "John"
     },
     last_name: {
-        type: "string",
+        type: DefineTypes.String,
         required: true,
         default: null
     }
-}
+});
 // My dummy data source
 const data = {
     first_name: "John",
@@ -170,7 +197,6 @@ console.log(isValidNotStrict); // Log { isValid: true, dataValidated: { first_na
 console.log(isValidExtended); // Log { isValid: true, dataValidated: { first_name: 'John', last_name: 'Doe' } }
 ```
 
-
 ## Define a Schema
 
 The `setSchema()` metode accept a `<Schema>` type object that need, for each paramenter specified, 3 parameters:
@@ -184,37 +210,32 @@ The `setSchema()` metode accept a `<Schema>` type object that need, for each par
 Here an example of a valid schema definition:
 
 ```javascript
-const Schema = {
+// Require `Schema`
+const { DefineTypes, Schema } = require('check-types-definitions');
+// Declare a new `Schema` object
+const schema = new Schema({
     field_1: {
-        type: "string"
+        type: DefineTypes.String
     },
     field_2: {
-        type: "number",
+        type: DefineTypes.Number,
         required: true
     },
     field_3: {
-        type: "string",
+        type: DefineTypes.String,
         default: null
     },
     field_4: {
-        type: "string",
+        type: DefineTypes.String,
         required: true,
         default: null
     }
-};
+});
 ```
 
 ## Schema types Allowed
 
-List of current valid data type in `Schemas`:
-
-1. `any`
-2. `string`
-3. `number`
-4. `function`
-5. `object`
-6. `array`
-7. `boolean`
+The `Schema` type property allowed only `DefineTypes` data type definitions. Check the allowed list of typed [here](#define-data-types-list).
 
 
 ## Valid Schema options

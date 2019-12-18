@@ -1,2 +1,2 @@
-const { Types, Validation } = require('./dist');
-module.exports = { Types, Validation };
+const { DefineTypes, Types, Validation, Schema } = require('./dist');
+module.exports = { DefineTypes, Types, Validation, Schema };
