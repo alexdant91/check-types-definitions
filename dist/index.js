@@ -71,8 +71,6 @@ class Types {
     }
 
     clearConfig = () => {
-        this.rfb = true;
-        this.rtb = true;
         this.value = undefined;
         this.types = [];
         this.required = false;
@@ -88,7 +86,7 @@ class Types {
         const typesArray = types == null ? this.types : types;
         if (typesArray.indexOf(typeError) !== -1 || this.types.indexOf("any") !== -1) return true;
         // Value not corrisponding to types
-        if (!this.rb || !bool) throw new Error(`Value is marked as type "${typeCheckError}" but you get type "${typeError}"`);
+        if (!this.rtb || !bool) throw new Error(`Value is marked as type "${typeCheckError}" but you get type "${typeError}"`);
         return false;
     }
 
