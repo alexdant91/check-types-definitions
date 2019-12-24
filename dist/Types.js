@@ -140,14 +140,12 @@ class Types {
             if (this.Schema == null) {
                 if (!this.interface) {
                     if (this.checkType(this.value)) {
-                        this.clearConfig();
                         if (this.rtb) return true;
                         return this.value;
                     }
                 } else {
                     const ClassInterface = this.interface;
                     const result = this.value instanceof ClassInterface;
-                    this.clearConfig();
                     return result;
                 }
             } else {
