@@ -59,7 +59,8 @@ class Schema {
 
 class Types {
     constructor(value, Interface = false) {
-        this.rb = false; // Return boolean if false, not throw new Error
+        this.rfb = true; // Return boolean if true, otherwise throw a new Error
+        this.rtb = true; // Return boolean if true, otherwise return data entered
         this.value = value;
         this.types = [];
         this.required = false;
@@ -70,6 +71,8 @@ class Types {
     }
 
     clearConfig = () => {
+        this.rfb = true;
+        this.rtb = true;
         this.value = undefined;
         this.types = [];
         this.required = false;
@@ -159,8 +162,11 @@ class Types {
         }, { strict: this.SchemaStrictMode });
     }
 
-    options = (options = { return_boolean: false }) => {
-        this.rb = options.return_boolean;
+    options = (options = { return_false_boolean: true, return_true_boolean: true }) => {
+        // If false return new Error(), if true return Boolean
+        this.rfb = options.return_false_boolean != undefined ? options.return_false_boolean : false;
+        // If false return the data inserted, if true return Boolean
+        this.rtb = options.return_true_boolean != undefined ? options.return_true_boolean : true;
         return this;
     }
 
@@ -189,7 +195,8 @@ class Types {
                 if (!this.interface) {
                     if (this.checkType(this.value)) {
                         this.clearConfig();
-                        return true;
+                        if (this.rtb) return true;
+                        return this.value;
                     }
                 } else {
                     const ClassInterface = this.interface;
@@ -205,17 +212,18 @@ class Types {
                     return { isValid: result.isValid, dataValidated: result.dataValidated }
                 } else if (result.error == null && !this.SchemaExtendedMode) {
                     this.clearConfig();
-                    return true
+                    if (this.rtb) return true;
+                    return this.value;
                 } else {
-                    if (!this.rb) throw new Error(result.error);
                     this.clearConfig();
+                    if (!this.rfb) throw new Error(result.error);
                     return false;
                 }
             }
         }
         // Value required but empty
         this.clearConfig();
-        if (!this.rb) throw new Error('Value is marked as required but no data was provided');
+        if (!this.rfb) throw new Error('Value is marked as required but no data was provided');
         return false;
     }
 
@@ -296,27 +304,28 @@ class Validate extends Types {
     // ?NEW FEATURE
     isNotNull = () => {
         if (typeof this.value !== 'null') return true;
-        if (!this.rb) throw new Error("Value must be not null");
+        if (!this.rfb) throw new Error("Value must be not null");
         return false;
     }
 
     isEmail = () => {
         const regExp = this.STANDARD_EMAIL;
         if (this.value.toString().match(regExp)) return true;
-        if (!this.rb) throw new Error("Value must be a valid email \"example@domain.ext\"");
+        if (!this.rfb) throw new Error("Value must be a valid email \"example@domain.ext\"");
         return false;
     }
 
     isUrl = () => {
         const regExp = this.STANDARD_URL;
         if (this.value.toString().match(regExp)) return true;
-        if (!this.rb) throw new Error("Value must be a valid url \"example@domain.ext\"");
+        if (!this.rfb) throw new Error("Value must be a valid url \"https://example.com\"");
         return false;
     }
 
     isPhone = (format = this.STANDARD_PHONE_NUMBER) => {
         const regExp = format;
         if (this.value.toString().match(regExp)) return true;
+        if (!this.rfb) throw new Error("Value must be a valid phone number \"3121223456\"");
         return false;
     }
 

@@ -1,7 +1,7 @@
 // Require classes
 const { Types, DefineTypes, Schema } = require('../index');
 // Declare `Types`
-const CheckTypes = new Types().options({ return_boolean: true });
+const CheckTypes = new Types().options({ return_false_boolean: true });
 // Declare a new Schema
 const schema = new Schema({
     first_name: {

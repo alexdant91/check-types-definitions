@@ -38,7 +38,7 @@ const { Types, Validate } = require('check-types-definitions');
 Then you can use `Types` in two ways. First you can declare it on a new constant and use it multiple times:
 
 ```javascript
-const CheckTypes = new Types().options({ return_boolean: true });
+const CheckTypes = new Types().options({ return_false_boolean: true, return_true_boolean: true });
 
 const value = "12";
 const check1 = CheckTypes.set(value).String().Number().Required().check();
@@ -77,7 +77,7 @@ The first scope is to give the ability to manage data type without TypeScript. `
 
 | Name         | Params                  | Description                                                                                                | Default  |
 |--------------|:-----------------------:|------------------------------------------------------------------------------------------------------------|:--------:|
-| `options()`  | `(options<Object>)`    | `return_boolean<Boolean>`. If true the `false` response will be boolean otherwise it will throw a new Error.| `false`  |
+| `options()`  | `(options<Object>)`    | `return_false_boolean<Boolean>`. If true the `false` response will be boolean otherwise it will throw a new Error. `return_true_boolean<Boolean>`. If true the `true` response will be boolean otherwise it will return the checked data. | `false`  |
 | `set()`      | `(<Any>, <Class>)`     | Set the `value` and `Interface` outside the constructor.                                                    |    --    |
 | `setSchema()`| `(<Schema>, <Options>)`| Set the `schema` and `options` for your validation rules. More info [here](#how-to-use-schema).             |    --    |
 | `check()`    | --                     | Run the validation process.                                                                                 |    --    |
