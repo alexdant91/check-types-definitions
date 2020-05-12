@@ -7,7 +7,10 @@ class Types {
         this.rtb = true; // Return boolean if true, otherwise return data entered
         this.value = value;
         this.types = [];
+        this.enum = false;
         this.required = false;
+        this.arrayChildrensSchema = false;
+        this.arrayChildrensStatic = false;
         this.interface = Interface;
         this.Schema = null;
         this.SchemaStrictMode = true;
@@ -17,7 +20,10 @@ class Types {
     clearConfig = () => {
         this.value = undefined;
         this.types = [];
+        this.enum = false;
         this.required = false;
+        this.arrayChildrensSchema = false;
+        this.arrayChildrensStatic = false;
         this.Schema = null;
         this.SchemaStrictMode = true;
         this.SchemaExtendedMode = true;
@@ -28,9 +34,9 @@ class Types {
         const typeError = Array.isArray(value) ? "array" : typeof value;
         const typeCheckError = types == null ? this.types.join('" or "') : types.join('" or "');
         const typesArray = types == null ? this.types : types;
-        if (typesArray.indexOf(typeError) !== -1 || this.types.indexOf("any") !== -1) return true;
+        if (typesArray.indexOf(typeError) !== -1 || typesArray.indexOf("any") !== -1) return true;
         // Value not corrisponding to types
-        if (!this.rtb || !bool) throw new Error(`Value is marked as type "${typeCheckError}" but you get type "${typeError}"`);
+        if (!this.rfb || !bool) throw new Error(`Value "${JSON.stringify(value)}" is marked as type "${typeCheckError}" but you get type "${typeError}"`);
         return false;
     }
 
@@ -38,7 +44,7 @@ class Types {
         if (this.required) {
             if (this.types == "object") {
                 return Object.keys(value).length > 0;
-            } else if (this.types == "array") {
+            } else if (this.types == "array" && value != null && value != undefined) {
                 return value.length > 0;
             } else {
                 return value != undefined && value != null && value.length != "";
@@ -76,9 +82,9 @@ class Types {
                 // Validate required if defined
                 if (validation.required) {
                     if (validation.default === undefined) {
-                        if (!this.checkType(data[key], ["boolean"], true) && (data[key] == undefined || data[key] == '')) return cb({ field: `${key}`, message: `'${key}' is required.` }, false, null);
+                        if (typeof data[key] !== "boolean" && (data[key] == undefined || data[key] == '')) return cb({ field: `${key}`, message: `'${key}' is required.` }, false, null);
                     } else {
-                        if (!this.checkType(data[key], ["boolean"], true) && (data[key] == undefined || data[key] == '')) {
+                        if (typeof data[key] !== "boolean" && (data[key] == undefined || data[key] == '')) {
                             dataValidated = { ...dataValidated, [key]: typeof validation.default === "function" ? validation.default() : validation.default }
                             isDefault = true;
                         }
@@ -102,6 +108,29 @@ class Types {
         return this.validateDataSchema(this.value, this.Schema, (error, isValid, dataValidated) => {
             return { error, isValid, dataValidated };
         }, { strict: this.SchemaStrictMode });
+    }
+
+    checkArrayChildrensSchemaDefinitions = () => {
+        let arrayValidator = [];
+        this.value.forEach(value => {
+            this.validateDataSchema(value, this.arrayChildrensSchema, (error, isValid, dataValidated) => {
+                arrayValidator.push(isValid);
+            }, { strict: this.SchemaStrictMode });
+        });
+        return arrayValidator.indexOf(false) === -1;
+    }
+
+    checkArrayChildrensStaticDefinitions = () => {
+        let arrayValidator = [];
+        this.value.forEach(value => {
+            arrayValidator.push(this.checkType(value, [this.arrayChildrensStatic], true));
+        });
+        return arrayValidator.indexOf(false) === -1;
+    }
+
+    checkEnumValues = (input, values) => {
+        if (values.indexOf(input) !== -1) return true;
+        return false;
     }
 
     options = (options = { return_false_boolean: true, return_true_boolean: true }) => {
@@ -140,6 +169,40 @@ class Types {
             if (this.Schema == null) {
                 if (!this.interface) {
                     if (this.checkType(this.value)) {
+                        // Check Enum
+                        if (this.enum) {
+                            if (this.checkEnumValues(this.value, this.enum)) {
+                                if (this.rtb) return true;
+                                return this.value;
+                            } else {
+                                this.clearConfig();
+                                if (!this.rfb) throw new Error('Value is not allowed, check your enum validation array.');
+                                return false;
+                            }
+                        }
+                        // Check Array Childrens Schema
+                        if (this.arrayChildrensSchema) {
+                            if (this.checkArrayChildrensSchemaDefinitions()) {
+                                if (this.rtb) return true;
+                                return this.value;
+                            } else {
+                                this.clearConfig();
+                                if (!this.rfb) throw new Error('You got an array as expected but it\'s childrens doesn\'t pass schema definition check.');
+                                return false;
+                            }
+                        }
+                        // Check Array Childrens Static
+                        if (this.arrayChildrensStatic) {
+                            if (this.checkArrayChildrensStaticDefinitions()) {
+                                if (this.rtb) return true;
+                                return this.value;
+                            } else {
+                                this.clearConfig();
+                                if (!this.rfb) throw new Error('You got an array as expected but it\'s childrens doesn\'t pass type check.');
+                                return false;
+                            }
+                        }
+                        // Not Enum && Not Array Childrens Schema && Not Array Childrens Static
                         if (this.rtb) return true;
                         return this.value;
                     }
@@ -168,6 +231,15 @@ class Types {
         this.clearConfig();
         if (!this.rfb) throw new Error('Value is marked as required but no data was provided');
         return false;
+    }
+
+    Enum = (valids) => {
+        if (!valids || !Array.isArray(valids) || valids.length == 0) {
+            if (!this.rfb) throw new Error('Enum `valids` parameter must be a not empty array.');
+            return false;
+        }
+        this.enum = valids;
+        return this;
     }
 
     Required = () => {
@@ -217,7 +289,12 @@ class Types {
         return this;
     }
 
-    Array = () => {
+    Array = (childrens = { of: false }) => {
+        if (childrens.of && childrens.of instanceof Schema) {
+            this.arrayChildrensSchema = childrens.of;
+        } else if (childrens.of && typeof childrens.of === "string") {
+            this.arrayChildrensStatic = childrens.of;
+        }
         this.types.push(DefineTypes.Array);
         return this;
     }
