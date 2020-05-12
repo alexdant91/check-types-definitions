@@ -1,6 +1,6 @@
 {
   "name": "check-types-definitions",
-  "version": "1.3.12",
+  "version": "1.3.13",
   "description": "JS Library to manage types and validations",
   "main": "index.js",
   "scripts": {

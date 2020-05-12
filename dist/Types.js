@@ -129,7 +129,15 @@ class Types {
     }
 
     checkEnumValues = (input, values) => {
-        if (values.indexOf(input) !== -1) return true;
+        if (!Array.isArray(input)) {
+            if (values.indexOf(input) !== -1) return true;
+        } else {
+            let arrayValidator = [];
+            input.forEach(item => {
+                if (values.indexOf(item) !== -1) arrayValidator.push(true);
+            });
+            return arrayValidator.indexOf(false) === -1;
+        }
         return false;
     }
 
