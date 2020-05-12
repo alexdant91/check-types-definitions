@@ -122,8 +122,9 @@ class Types {
 
     checkArrayChildrensStaticDefinitions = () => {
         let arrayValidator = [];
+        const arrayChildrensStatic = Array.isArray(this.arrayChildrensStatic) ? this.arrayChildrensStatic : [this.arrayChildrensStatic];
         this.value.forEach(value => {
-            arrayValidator.push(this.checkType(value, [this.arrayChildrensStatic], true));
+            arrayValidator.push(this.checkType(value, arrayChildrensStatic, true));
         });
         return arrayValidator.indexOf(false) === -1;
     }
@@ -300,7 +301,7 @@ class Types {
     Array = (childrens = { of: false }) => {
         if (childrens.of && childrens.of instanceof Schema) {
             this.arrayChildrensSchema = childrens.of;
-        } else if (childrens.of && typeof childrens.of === "string") {
+        } else if (childrens.of && (typeof childrens.of === "string" || Array.isArray(childrens.of))) {
             this.arrayChildrensStatic = childrens.of;
         }
         this.types.push(DefineTypes.Array);

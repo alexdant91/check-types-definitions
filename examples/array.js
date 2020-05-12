@@ -44,7 +44,7 @@ const birth_date = CheckTypes.set(req.body.birth_date).Required().String().check
 const gender = CheckTypes.set(req.body.gender).Required().String().Enum(["M", "F"]).check();
 const geo_location = CheckTypes.set(req.body.geo_location).setSchema(geoLocationSchema, { strict: true, extended: true }).check().dataValidated;
 const rr = CheckTypes.set(req.body.rr).Required().Array({ of: rrSchema }).check();
-const aa = CheckTypes.set(req.body.aa).Required().Array({ of: DefineTypes.String }).check();
+const aa = CheckTypes.set(req.body.aa).Required().Array({ of: [DefineTypes.String, DefineTypes.Number] }).check();
 const ox_saturation = CheckTypes.set(req.body.ox_saturation).Required().Number().check();
 
 console.log({ birth_date, gender, geo_location, rr, aa, ox_saturation })
