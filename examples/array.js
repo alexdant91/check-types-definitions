@@ -14,7 +14,8 @@ const req = {
             { "average": 12.3456, "frequency": [1123123, 1231233] }
         ],
         "aa": ["st", "rt", 12],
-        "ox_saturation": 80
+        "ox_saturation": 80,
+        "bb": [12, "ciao"]
     }
 };
 
@@ -45,6 +46,8 @@ const gender = CheckTypes.set(req.body.gender).Required().String().Enum(["M", "F
 const geo_location = CheckTypes.set(req.body.geo_location).setSchema(geoLocationSchema, { strict: true, extended: true }).check().dataValidated;
 const rr = CheckTypes.set(req.body.rr).Required().Array({ of: rrSchema }).check();
 const aa = CheckTypes.set(req.body.aa).Required().Array({ of: [DefineTypes.String, DefineTypes.Number] }).check();
+const bb = CheckTypes.set(req.body.bb).Default([]).Array({ of: [DefineTypes.String, DefineTypes.Number] }).check();
+const cc = CheckTypes.set(req.body.cc).Default([]).Array({ of: [DefineTypes.String, DefineTypes.Number] }).check();
 const ox_saturation = CheckTypes.set(req.body.ox_saturation).Required().Number().check();
 
-console.log({ birth_date, gender, geo_location, rr, aa, ox_saturation })
+console.log({ birth_date, gender, geo_location, rr, aa, bb, cc, ox_saturation })

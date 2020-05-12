@@ -133,9 +133,10 @@ const aaSchema = new Schema({
         required: true
     }
 });
-// Now I want to check if `aa` is and array of objects defined in schema and `bb` is an array of Strings
+// Now I want to check if `aa` is and array of objects defined in schema, `bb` is an array of Strings, and cc is an array of Strings or Numbers with a default value of `[]`
 const aa = CheckTypes.set(data.aa).Required().Array({ of: aaSchema }).check(); // Return [{ "average": 12.3456, "frequency": [1123123, 1231233] }, { "average": 12.3456, "frequency": [1123123, 1231233] }]
 const bb = CheckTypes.set(data.bb).Required().Array({ of: DefineTypes.String }).check(); // Return false
+const cc = CheckTypes.set(data.cc).Default([]).Array({ of: [DefineTypes.String, DefineTypes.Number] }).check(); // Return [] as default
 ```
 
 ## How to use Interface

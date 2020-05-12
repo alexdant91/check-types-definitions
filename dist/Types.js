@@ -9,6 +9,7 @@ class Types {
         this.types = [];
         this.enum = false;
         this.required = false;
+        this.defaultValue = null;
         this.arrayChildrensSchema = false;
         this.arrayChildrensStatic = false;
         this.interface = Interface;
@@ -22,6 +23,7 @@ class Types {
         this.types = [];
         this.enum = false;
         this.required = false;
+        this.defaultValue = null;
         this.arrayChildrensSchema = false;
         this.arrayChildrensStatic = false;
         this.Schema = null;
@@ -214,6 +216,9 @@ class Types {
                         // Not Enum && Not Array Childrens Schema && Not Array Childrens Static
                         if (this.rtb) return true;
                         return this.value;
+                    } else if (!this.checkType(this.value) && this.defaultValue !== null) {
+                        if (this.rtb) return true;
+                        return this.defaultValue;
                     }
                 } else {
                     const ClassInterface = this.interface;
@@ -253,6 +258,11 @@ class Types {
 
     Required = () => {
         this.required = true;
+        return this;
+    }
+
+    Default = (value) => {
+        this.defaultValue = value;
         return this;
     }
 
